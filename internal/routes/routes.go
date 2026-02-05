@@ -15,7 +15,6 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine) {
-	// Start Chat Hub
 	go chat.GlobalHub.Run()
 
 	r.Use(middleware.RateLimitMiddleware())
@@ -52,8 +51,8 @@ func SetupRoutes(r *gin.Engine) {
 		jobProviderGroup := api.Group("/job-provider")
 		{
 			jobProviderGroup.POST("/profile", provider.CreateOrUpdateProfile)
-			jobProviderGroup.GET("/profile", provider.GetProfile)          // Get own profile
-			jobProviderGroup.GET("/profile/:user_id", provider.GetProfile) // Get specific profile
+			jobProviderGroup.GET("/profile", provider.GetProfile)
+			jobProviderGroup.GET("/profile/:user_id", provider.GetProfile)
 		}
 
 		// Company routes
@@ -67,10 +66,10 @@ func SetupRoutes(r *gin.Engine) {
 			// Product routes nested under company
 			companyGroup.POST("/:id/products", company.AddProduct)
 			companyGroup.GET("/:id/products", company.GetCompanyProducts)
-			
+
 			// Job routes nested under company
-			companyGroup.POST("/:company_id/jobs", job.CreateJob)
-			companyGroup.GET("/:company_id/jobs", job.GetCompanyJobs)
+			companyGroup.POST("/:id/jobs", job.CreateJob)
+			companyGroup.GET("/:id/jobs", job.GetCompanyJobs)
 		}
 
 		// Direct product manipulation
@@ -88,7 +87,7 @@ func SetupRoutes(r *gin.Engine) {
 			jobGroup.GET("/:job_id", job.GetJob)
 			jobGroup.PUT("/:job_id", job.UpdateJob)
 			jobGroup.DELETE("/:job_id", job.DeleteJob)
-			
+
 			// Applicant routes
 			jobGroup.GET("/:job_id/applicants", job.GetJobApplicants)
 			jobGroup.PUT("/applications/:application_id/status", job.UpdateApplicationStatus)
@@ -98,9 +97,9 @@ func SetupRoutes(r *gin.Engine) {
 		jobSeekerGroup := api.Group("/job-seeker")
 		{
 			jobSeekerGroup.POST("/profile", jobseeker.CreateOrUpdateProfile)
-			jobSeekerGroup.GET("/profile", jobseeker.GetProfile)          // Get own profile
-			jobSeekerGroup.GET("/profile/:user_id", jobseeker.GetProfile) // Get specific profile
-			jobSeekerGroup.GET("/profiles", jobseeker.GetAllProfiles)     // List all (for providers)
+			jobSeekerGroup.GET("/profile", jobseeker.GetProfile)
+			jobSeekerGroup.GET("/profile/:user_id", jobseeker.GetProfile)
+			jobSeekerGroup.GET("/profiles", jobseeker.GetAllProfiles)
 
 			// Internship routes
 			jobSeekerGroup.POST("/internships", jobseeker.AddInternship)

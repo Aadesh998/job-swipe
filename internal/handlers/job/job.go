@@ -24,7 +24,7 @@ type JobInput struct {
 
 func CreateJob(c *gin.Context) {
 	userID, _ := c.Get("user_id")
-	companyID := c.Param("company_id")
+	companyID := c.Param("id")
 
 	var company models.Company
 	if err := database.DB.First(&company, companyID).Error; err != nil {
@@ -143,7 +143,7 @@ func GetJob(c *gin.Context) {
 }
 
 func GetCompanyJobs(c *gin.Context) {
-	companyID := c.Param("company_id")
+	companyID := c.Param("id")
 
 	var jobs []models.Job
 	if err := database.DB.Where("company_id = ?", companyID).Find(&jobs).Error; err != nil {
