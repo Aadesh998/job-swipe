@@ -13,13 +13,3 @@ clean:
 
 migration:
 	go run $(MIGRATION_PATH)
-
-docker:
-	docker run --name postgres-db \
-	-e POSTGRES_PASSWORD=yourpassword \
-	-p 5432:5432 \
-	-d postgres:latest
-
-dockerDB:
-	sleep 8
-	docker exec postgres-db psql -U postgres -c "CREATE DATABASE aron_db;"
