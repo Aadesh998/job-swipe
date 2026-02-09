@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
-	"aron_project/internal/utils"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
+	"job_swipe/internal/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -38,11 +38,11 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := utils.GenerateToken(user.ID, user.Email, user.Role)
+	tokenPair, err := utils.GenerateTokenPair(user.ID, user.Email, user.Role)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Failed to generate token", err.Error())
+		response.Error(c, http.StatusInternalServerError, "Failed to generate tokens", err.Error())
 		return
 	}
 
-	response.Success(c, "Login successful", gin.H{"token": token})
+	response.Success(c, "Login successful", tokenPair)
 }

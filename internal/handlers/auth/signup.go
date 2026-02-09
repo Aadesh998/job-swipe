@@ -1,10 +1,11 @@
 package auth
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
-	"aron_project/internal/utils"
+	"fmt"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
+	"job_swipe/internal/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,7 @@ import (
 type SignupInput struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
-	Role     string `json:"role" binding:"omitempty,oneof=job_seeker job_provider"`
+	Role     string `json:"role" binding:"omitempty,oneof=job_seeker job_provider admin"`
 }
 
 func Signup(c *gin.Context) {
@@ -23,7 +24,6 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	// Default role if not provided
 	if input.Role == "" {
 		input.Role = "job_seeker"
 	}
@@ -55,7 +55,7 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	verifyLink := "http://localhost:5900/auth/verify-email?token=" + verificationToken
+	verifyLink := fmt.Sprintf("%s/auth/verify-email?token=%s", c.Request.Host, verificationToken)
 	emailBody := "Click here to verify your email: <a href='" + verifyLink + "'>Verify Email</a>"
 	go utils.SendEmail(user.Email, "Verify your email", emailBody)
 

@@ -1,9 +1,9 @@
 package company
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
 	"net/http"
 	"strconv"
 
@@ -17,7 +17,6 @@ type ProductInput struct {
 	Price       float64 `json:"price"`
 }
 
-// AddProduct adds a product to a specific company
 func AddProduct(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	companyID := c.Param("id")
@@ -55,11 +54,9 @@ func AddProduct(c *gin.Context) {
 	response.Created(c, "Product added successfully", product)
 }
 
-// GetCompanyProducts retrieves all products for a specific company
 func GetCompanyProducts(c *gin.Context) {
 	companyID := c.Param("id")
-	
-	// Check if company exists
+
 	var company models.Company
 	if err := database.DB.First(&company, companyID).Error; err != nil {
 		response.Error(c, http.StatusNotFound, "Company not found", nil)
@@ -75,7 +72,6 @@ func GetCompanyProducts(c *gin.Context) {
 	response.Success(c, "Products retrieved successfully", products)
 }
 
-// UpdateProduct updates a product's details
 func UpdateProduct(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	productID := c.Param("product_id")
@@ -86,7 +82,6 @@ func UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	// Verify ownership via company
 	var company models.Company
 	if err := database.DB.First(&company, product.CompanyID).Error; err != nil {
 		response.Error(c, http.StatusInternalServerError, "Associated company not found", nil)
@@ -117,7 +112,6 @@ func UpdateProduct(c *gin.Context) {
 	response.Success(c, "Product updated successfully", product)
 }
 
-// DeleteProduct removes a product
 func DeleteProduct(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	productID := c.Param("product_id")
@@ -128,7 +122,6 @@ func DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	// Verify ownership
 	var company models.Company
 	if err := database.DB.First(&company, product.CompanyID).Error; err != nil {
 		response.Error(c, http.StatusInternalServerError, "Associated company not found", nil)
@@ -148,11 +141,9 @@ func DeleteProduct(c *gin.Context) {
 	response.Success(c, "Product deleted successfully", nil)
 }
 
-// GetProduct retrieves a single product
 func GetProduct(c *gin.Context) {
 	id := c.Param("product_id")
-	
-	// Validate ID is numeric
+
 	if _, err := strconv.Atoi(id); err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid product ID", nil)
 		return

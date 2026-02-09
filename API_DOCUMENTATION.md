@@ -1,5 +1,11 @@
 # Aron Project API Documentation
 
+## Base URLs
+- **Direct Backend:** `http://localhost:8080`
+- **API Gateway:** `http://localhost:8081`
+
+> **Note:** All `/api` routes now use the `/v1` prefix through the Gateway (e.g., `http://localhost:8081/api/v1/...`).
+
 ## Authentication
 
 ### User Signup
@@ -16,12 +22,44 @@
 
 ### User Login
 - **Endpoint:** `POST /auth/login`
-- **Description:** Authenticate user and receive a JWT token.
+- **Description:** Authenticate user and receive access and refresh tokens.
 - **Body:**
   ```json
   {
     "email": "user@example.com",
     "password": "password123"
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "status": "success",
+    "message": "Login successful",
+    "data": {
+      "access_token": "eyJhbGci...",
+      "refresh_token": "eyJhbGci..."
+    }
+  }
+  ```
+
+### Refresh Token
+- **Endpoint:** `POST /auth/refresh`
+- **Description:** Get a new access token using a valid refresh token.
+- **Body:**
+  ```json
+  {
+    "refresh_token": "eyJhbGci..."
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "status": "success",
+    "message": "Token refreshed successfully",
+    "data": {
+      "access_token": "new_access_token...",
+      "refresh_token": "new_refresh_token..."
+    }
   }
   ```
 
@@ -148,13 +186,14 @@
 ## Job Seekers
 
 ### Create/Update Profile
-- **Endpoint:** `POST /api/job-seeker/profile`
+- **Endpoint:** `POST /api/v1/job-seeker/profile`
 - **Body:**
   ```json
   {
     "first_name": "John",
     "last_name": "Doe",
     "skills": "Go, Python",
+    "job_preferences": ["Backend Development", "AI Engineer"],
     "is_open_to_work": true
   }
   ```

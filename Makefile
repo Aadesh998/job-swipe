@@ -1,4 +1,4 @@
-APP_NAME=aron_project
+APP_NAME=job_swipe
 CMD_PATH=./cmd/server/main.go
 MIGRATION_PATH=./cmd/migration/main.go
 
@@ -13,3 +13,12 @@ clean:
 
 migration:
 	go run $(MIGRATION_PATH)
+
+run-gateway:
+	go run ./cmd/gateway/main.go
+
+compose-up:
+	docker compose up -d
+
+compose-down:
+	docker compose down

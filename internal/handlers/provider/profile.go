@@ -1,9 +1,9 @@
 package provider
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +17,6 @@ type ProfileInput struct {
 	Bio           string `json:"bio"`
 }
 
-// CreateOrUpdateProfile creates or updates the job provider's personal profile
 func CreateOrUpdateProfile(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	role, _ := c.Get("role")
@@ -65,11 +64,9 @@ func CreateOrUpdateProfile(c *gin.Context) {
 	}
 }
 
-// GetProfile gets the profile of the current user (provider)
 func GetProfile(c *gin.Context) {
 	userID := c.Param("user_id")
 
-	// If no param or "me", get current user's profile
 	if userID == "" || userID == "me" {
 		uid, _ := c.Get("user_id")
 		var profile models.JobProviderProfile
@@ -81,7 +78,6 @@ func GetProfile(c *gin.Context) {
 		return
 	}
 
-	// Fetch another user's profile (e.g. admin viewing provider)
 	var profile models.JobProviderProfile
 	if err := database.DB.Preload("User").Where("user_id = ?", userID).First(&profile).Error; err != nil {
 		response.Error(c, http.StatusNotFound, "Profile not found", nil)

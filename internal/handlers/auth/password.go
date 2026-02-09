@@ -1,10 +1,11 @@
 package auth
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
-	"aron_project/internal/utils"
+	"fmt"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
+	"job_swipe/internal/utils"
 	"net/http"
 	"time"
 
@@ -37,7 +38,7 @@ func ForgotPassword(c *gin.Context) {
 	user.ResetTokenExpiry = &expiry
 	database.DB.Save(&user)
 
-	resetLink := "http://localhost:5900/auth/reset-password-page?token=" + resetToken
+	resetLink := fmt.Sprintf("%s/auth/reset-password?token=%s", c.Request.Host, resetToken)
 	emailBody := "Click here to reset your password: <a href='" + resetLink + "'>Reset Password</a>"
 	go utils.SendEmail(user.Email, "Reset Password", emailBody)
 

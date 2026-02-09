@@ -16,5 +16,5 @@ type Internship struct {
 	EndDate            time.Time `json:"end_date"`
 	IsCurrent          bool      `json:"is_current"`
 	Location           string    `json:"location"`
-	Technologies       string    `json:"technologies"` // Comma-separated or JSON
+	Technologies       string    `json:"technologies"`
 }

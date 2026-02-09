@@ -1,9 +1,9 @@
 package job
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

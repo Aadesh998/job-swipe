@@ -1,12 +1,12 @@
 package auth
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
-	"aron_project/internal/utils"
 	"context"
 	"encoding/json"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
+	"job_swipe/internal/utils"
 	"net/http"
 	"os"
 
@@ -51,7 +51,6 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	// Fetch user info using the token
 	client := getGoogleConfig().Client(context.Background(), token)
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
@@ -77,11 +76,10 @@ func GoogleCallback(c *gin.Context) {
 	result := database.DB.Where("email = ?", googleUser.Email).First(&user)
 
 	if result.Error != nil {
-		// User not found, create new user
 		user = models.User{
 			Email:      googleUser.Email,
 			GoogleID:   googleUser.ID,
-			IsVerified: true, // Google emails are verified
+			IsVerified: true,
 			Role:       "job_seeker",
 			AvatarURL:  googleUser.Picture,
 		}
@@ -90,16 +88,15 @@ func GoogleCallback(c *gin.Context) {
 			return
 		}
 	} else {
-		// User found, update GoogleID if missing
 		if user.GoogleID == "" {
 			user.GoogleID = googleUser.ID
 			user.AvatarURL = googleUser.Picture
-			user.IsVerified = true // Trust Google
+			user.IsVerified = true
 			database.DB.Save(&user)
 		}
 	}
 
-	jwtToken, err := utils.GenerateToken(user.ID, user.Email, user.Role)
+	jwtToken, err := utils.GenerateTokenPair(user.ID, user.Email, user.Role)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to generate token", err.Error())
 		return

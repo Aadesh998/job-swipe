@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"aron_project/internal/response"
 	"fmt"
+	"job_swipe/internal/response"
 	"net/http"
 	"os"
 	"strings"

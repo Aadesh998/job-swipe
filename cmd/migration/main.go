@@ -1,8 +1,8 @@
 package main
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
 	"log"
 
 	"github.com/joho/godotenv"

@@ -1,23 +1,24 @@
 package jobseeker
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type ProfileInput struct {
-	FirstName    string `json:"first_name" binding:"required"`
-	LastName     string `json:"last_name" binding:"required"`
-	ResumeURL    string `json:"resume_url"`
-	Skills       string `json:"skills"`
-	Experience   string `json:"experience"`
-	Education    string `json:"education"`
-	Bio          string `json:"bio"`
-	IsOpenToWork bool   `json:"is_open_to_work"`
+	FirstName      string   `json:"first_name" binding:"required"`
+	LastName       string   `json:"last_name" binding:"required"`
+	ResumeURL      string   `json:"resume_url"`
+	Skills         string   `json:"skills"`
+	Experience     string   `json:"experience"`
+	Education      string   `json:"education"`
+	Bio            string   `json:"bio"`
+	JobPreferences []string `json:"job_preferences"`
+	IsOpenToWork   bool     `json:"is_open_to_work"`
 }
 
 func CreateOrUpdateProfile(c *gin.Context) {
@@ -40,15 +41,16 @@ func CreateOrUpdateProfile(c *gin.Context) {
 
 	if result.Error != nil {
 		profile = models.JobSeekerProfile{
-			UserID:       userID.(uint),
-			FirstName:    input.FirstName,
-			LastName:     input.LastName,
-			ResumeURL:    input.ResumeURL,
-			Skills:       input.Skills,
-			Experience:   input.Experience,
-			Education:    input.Education,
-			Bio:          input.Bio,
-			IsOpenToWork: input.IsOpenToWork,
+			UserID:         userID.(uint),
+			FirstName:      input.FirstName,
+			LastName:       input.LastName,
+			ResumeURL:      input.ResumeURL,
+			Skills:         input.Skills,
+			Experience:     input.Experience,
+			Education:      input.Education,
+			Bio:            input.Bio,
+			JobPreferences: input.JobPreferences,
+			IsOpenToWork:   input.IsOpenToWork,
 		}
 		if err := database.DB.Create(&profile).Error; err != nil {
 			response.Error(c, http.StatusInternalServerError, "Failed to create profile", err.Error())
@@ -63,6 +65,7 @@ func CreateOrUpdateProfile(c *gin.Context) {
 		profile.Experience = input.Experience
 		profile.Education = input.Education
 		profile.Bio = input.Bio
+		profile.JobPreferences = input.JobPreferences
 		profile.IsOpenToWork = input.IsOpenToWork
 
 		if err := database.DB.Save(&profile).Error; err != nil {
@@ -74,9 +77,8 @@ func CreateOrUpdateProfile(c *gin.Context) {
 }
 
 func GetProfile(c *gin.Context) {
-	userID := c.Param("user_id") // Can request own or others
+	userID := c.Param("user_id")
 
-	// If no param, assume current user
 	if userID == "" || userID == "me" {
 		uid, _ := c.Get("user_id")
 		var profile models.JobSeekerProfile
@@ -88,19 +90,16 @@ func GetProfile(c *gin.Context) {
 		return
 	}
 
-	// Fetch another user's profile (e.g., job provider viewing job seeker)
 	var profile models.JobSeekerProfile
 	if err := database.DB.Preload("User").Preload("Internships").Where("user_id = ?", userID).First(&profile).Error; err != nil {
 		response.Error(c, http.StatusNotFound, "Profile not found", nil)
 		return
 	}
-	
-	// Hide sensitive user data from User preload if needed, or rely on json tags
+
 	response.Success(c, "Profile retrieved successfully", profile)
 }
 
 func GetAllProfiles(c *gin.Context) {
-	// Only for job providers or admin?
 	role, _ := c.Get("role")
 	if role != "job_provider" && role != "admin" {
 		response.Error(c, http.StatusForbidden, "Unauthorized", nil)

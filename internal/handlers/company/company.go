@@ -1,9 +1,9 @@
 package company
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +20,6 @@ type CompanyInput struct {
 	LogoURL     string `json:"logo_url"`
 }
 
-// CreateCompany creates a new company profile for the user
 func CreateCompany(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
@@ -60,7 +59,6 @@ func CreateCompany(c *gin.Context) {
 	response.Created(c, "Company profile created successfully", company)
 }
 
-// GetUserCompanies returns all companies owned by the user
 func GetUserCompanies(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
@@ -77,7 +75,6 @@ func GetUserCompanies(c *gin.Context) {
 	response.Success(c, "Companies retrieved successfully", companies)
 }
 
-// GetCompany returns a specific company details
 func GetCompany(c *gin.Context) {
 	id := c.Param("id")
 	var company models.Company
@@ -89,18 +86,16 @@ func GetCompany(c *gin.Context) {
 	response.Success(c, "Company details", company)
 }
 
-// UpdateCompany updates a specific company
 func UpdateCompany(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	id := c.Param("id")
 	var company models.Company
-	
+
 	if err := database.DB.First(&company, id).Error; err != nil {
 		response.Error(c, http.StatusNotFound, "Company not found", nil)
 		return
 	}
 
-	// Verify ownership
 	if company.UserID != userID.(uint) {
 		response.Error(c, http.StatusForbidden, "You do not own this company", nil)
 		return

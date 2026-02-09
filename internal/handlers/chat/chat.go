@@ -1,9 +1,9 @@
 package chat
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
 	"log"
 	"net/http"
 	"strconv"
@@ -18,16 +18,15 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		return true // Allow all origins for now
+		return true
 	},
 }
 
-// Client represents a connected user
 type Client struct {
-	Hub      *Hub
-	UserID   uint
-	Conn     *websocket.Conn
-	Send     chan []byte
+	Hub    *Hub
+	UserID uint
+	Conn   *websocket.Conn
+	Send   chan []byte
 }
 
 type Hub struct {
@@ -82,9 +81,6 @@ func (c *Client) ReadPump() {
 			}
 			break
 		}
-		// Handle received message (e.g., save to DB, route to receiver)
-		// For simplicity, we assume the client sends JSON with receiver_id and content
-		// But ideally, we should parse it here.
 		log.Printf("Received message from %d: %s", c.UserID, message)
 	}
 }
@@ -140,21 +136,19 @@ type MessageInput struct {
 
 func SendMessage(c *gin.Context) {
 	senderID, _ := c.Get("user_id")
-	
+
 	var input MessageInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid input", err.Error())
 		return
 	}
 
-	// Verify receiver exists
 	var receiver models.User
 	if err := database.DB.First(&receiver, input.ReceiverID).Error; err != nil {
 		response.Error(c, http.StatusNotFound, "Receiver not found", nil)
 		return
 	}
 
-	// Save to DB
 	msg := models.Message{
 		SenderID:   senderID.(uint),
 		ReceiverID: input.ReceiverID,
@@ -167,12 +161,9 @@ func SendMessage(c *gin.Context) {
 		return
 	}
 
-	// Real-time send if user is connected
 	GlobalHub.mu.Lock()
 	if client, ok := GlobalHub.Clients[input.ReceiverID]; ok {
-		// Construct a simple notification or the full message payload
-		// For now, just sending the content
-		client.Send <- []byte(input.Content) 
+		client.Send <- []byte(input.Content)
 	}
 	GlobalHub.mu.Unlock()
 
@@ -182,7 +173,7 @@ func SendMessage(c *gin.Context) {
 func GetChatHistory(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	otherUserIDStr := c.Param("user_id")
-	
+
 	otherUserID, err := strconv.Atoi(otherUserIDStr)
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "Invalid user ID", nil)
@@ -190,7 +181,6 @@ func GetChatHistory(c *gin.Context) {
 	}
 
 	var messages []models.Message
-	// Fetch messages between userID and otherUserID
 	if err := database.DB.Where(
 		"(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)",
 		userID, otherUserID, otherUserID, userID,
@@ -204,17 +194,11 @@ func GetChatHistory(c *gin.Context) {
 
 func GetConversations(c *gin.Context) {
 	// userID, _ := c.Get("user_id")
-	
-	// Complex query to get latest message for each conversation
-	// For simplicity, just finding unique users communicated with
-	// This part might need optimization for production
-	
 	type Conversation struct {
-		UserID uint `json:"user_id"`
-		LastMessage string `json:"last_message"`
-		Timestamp time.Time `json:"timestamp"`
+		UserID      uint      `json:"user_id"`
+		LastMessage string    `json:"last_message"`
+		Timestamp   time.Time `json:"timestamp"`
 	}
-	
-	// Placeholder for actual implementation
+
 	response.Success(c, "Conversations list (Not implemented fully yet)", nil)
 }

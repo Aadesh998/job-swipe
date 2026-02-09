@@ -1,20 +1,18 @@
 package job
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-// GetJobApplicants retrieves all applicants for a specific job
 func GetJobApplicants(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	jobID := c.Param("job_id")
 
-	// Verify job ownership
 	var job models.Job
 	if err := database.DB.Preload("Company").First(&job, jobID).Error; err != nil {
 		response.Error(c, http.StatusNotFound, "Job not found", nil)
@@ -27,7 +25,6 @@ func GetJobApplicants(c *gin.Context) {
 	}
 
 	var applications []models.Application
-	// Preload User, JobSeekerProfile and its related data (Internships)
 	if err := database.DB.Preload("User").Preload("User.JobSeekerProfile").Preload("User.JobSeekerProfile.Internships").Where("job_id = ?", jobID).Find(&applications).Error; err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to fetch applicants", err.Error())
 		return
@@ -40,7 +37,6 @@ type UpdateApplicationStatusInput struct {
 	Status string `json:"status" binding:"required,oneof=applied reviewing interviewed rejected hired"`
 }
 
-// UpdateApplicationStatus allows job provider to change status (e.g., Shortlist, Reject)
 func UpdateApplicationStatus(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	applicationID := c.Param("application_id")
@@ -51,7 +47,6 @@ func UpdateApplicationStatus(c *gin.Context) {
 		return
 	}
 
-	// Verify ownership via Job -> Company -> UserID
 	if application.Job.Company.UserID != userID.(uint) {
 		response.Error(c, http.StatusForbidden, "You do not own this job application", nil)
 		return

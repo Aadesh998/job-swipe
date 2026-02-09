@@ -1,9 +1,9 @@
 package jobseeker
 
 import (
-	"aron_project/internal/database"
-	"aron_project/internal/models"
-	"aron_project/internal/response"
+	"job_swipe/internal/database"
+	"job_swipe/internal/models"
+	"job_swipe/internal/response"
 	"net/http"
 	"time"
 
@@ -24,7 +24,6 @@ type InternshipInput struct {
 func AddInternship(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 
-	// Get profile first
 	var profile models.JobSeekerProfile
 	if err := database.DB.Where("user_id = ?", userID).First(&profile).Error; err != nil {
 		response.Error(c, http.StatusNotFound, "Please create a profile first", nil)
@@ -67,7 +66,6 @@ func UpdateInternship(c *gin.Context) {
 		return
 	}
 
-	// Verify ownership
 	var profile models.JobSeekerProfile
 	if err := database.DB.First(&profile, internship.JobSeekerProfileID).Error; err != nil {
 		response.Error(c, http.StatusInternalServerError, "Profile not found", nil)
@@ -112,7 +110,6 @@ func DeleteInternship(c *gin.Context) {
 		return
 	}
 
-	// Verify ownership
 	var profile models.JobSeekerProfile
 	if err := database.DB.First(&profile, internship.JobSeekerProfileID).Error; err != nil {
 		response.Error(c, http.StatusInternalServerError, "Profile not found", nil)

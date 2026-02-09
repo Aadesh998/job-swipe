@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"aron_project/internal/response"
+	"job_swipe/internal/response"
 	"net/http"
 	"sync"
 
